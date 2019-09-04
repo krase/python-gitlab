@@ -123,9 +123,19 @@ class EventManager(ListMixin, RESTManager):
     _obj_cls = Event
     _list_filters = ("action", "target_type", "before", "after", "sort")
 
-
 class UserActivities(RESTObject):
     _id_attr = "username"
+
+
+class UserStatus(RESTObject):
+    _short_print_attr = "email"
+
+
+class UserStatusManager(GetMixin, UpdateMixin, RESTManager):
+    _path = "/users/%(user_id)s/status"
+    _obj_cls = UserStatus
+    _from_parent_attrs = {"user_id": "id"}
+    _create_attrs = (("status",), tuple())
 
 
 class UserActivitiesManager(ListMixin, RESTManager):
@@ -267,6 +277,7 @@ class User(SaveMixin, ObjectDeleteMixin, RESTObject):
     _managers = (
         ("customattributes", "UserCustomAttributeManager"),
         ("emails", "UserEmailManager"),
+        ("status", "UserStatusManager"),
         ("events", "UserEventManager"),
         ("gpgkeys", "UserGPGKeyManager"),
         ("impersonationtokens", "UserImpersonationTokenManager"),
@@ -410,10 +421,21 @@ class CurrentUserKeyManager(RetrieveMixin, CreateMixin, DeleteMixin, RESTManager
     _create_attrs = (("title", "key"), tuple())
 
 
+class CurrentUserStatus(RESTObject):
+    _short_print_attr = "emoji"
+
+
+class CurrentUserStatusManager(GetMixin, UpdateMixin, RESTManager):
+    _path = "/user/status"
+    _obj_cls = CurrentUserStatus
+    _create_attrs = (("emoji", "message", "message_html"), tuple())
+
+
 class CurrentUser(RESTObject):
     _id_attr = None
     _short_print_attr = "username"
     _managers = (
+        ("status", "CurrentUserStatusManager"),
         ("emails", "CurrentUserEmailManager"),
         ("gpgkeys", "CurrentUserGPGKeyManager"),
         ("keys", "CurrentUserKeyManager"),
